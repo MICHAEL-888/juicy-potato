@@ -41,5 +41,4 @@ jobs:
       with:
         name: Build-Output-Windows # 产物名称
         path: |
-          Release\x64\*.exe
-          Release\x64\*.pdb
+          Release\x64\JuicyPotato.exe
