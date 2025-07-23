@@ -31,7 +31,7 @@ jobs:
         # 简化命令：MSBuild通常在Path环境变量中，无需指定完整路径
         msbuild JuicyPotato.sln /p:Configuration=Release /p:Platform=x64 /p:ControlFlowGuard=false /t:Build
       # 如果解决方案文件不在仓库根目录，请在这里调整路径，例如：
-      working-directory: /JuicyPotato
+      working-directory: JuicyPotato
 
     - name: ⬆️ Upload Build Artifacts # 步骤4: 可选：上传编译后的产物
       uses: actions/upload-artifact@v4
