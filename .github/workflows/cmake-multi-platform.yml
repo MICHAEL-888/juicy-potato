@@ -16,13 +16,6 @@ jobs:
       with:
         fetch-depth: 0 # 建议获取完整历史，以便某些工具（如GitVersion）正常工作
 
-    - name: 📥 Restore NuGet packages # 步骤2: 可选：还原 NuGet 包
-      # 仅当您的C++项目使用NuGet管理依赖时才需要此步骤
-      # 替换为您的解决方案文件路径，例如 'YourSolution.sln'
-      # run: nuget restore YourSolution.sln 
-      # 请确保 YourSolution.sln 位于仓库根目录或指定正确路径
-      # MSBuild 也可以在构建时自动查找并还原 NuGet 包，但显式还原有时更清晰
-
     - name: 🔨 Build Visual Studio C++ Project # 步骤3: 使用 MSBuild 编译项目
       run: |
         # %VSAPPIDDIR% 是 Visual Studio 环境变量，通常指向 MSBuild
