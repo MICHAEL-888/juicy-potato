@@ -41,8 +41,5 @@ jobs:
       with:
         name: Build-Output-Windows # 产物名称
         path: |
-          # ***** 关键修复：路径现在是相对于 working-directory: JuicyPotato 的 *****
-          Release\x64\*.exe  # 实际的 .exe 文件路径
-          Release\x64\*.pdb  # 调试符号文件（通常也需要上传）
-          # 如果有 .dll 文件，也要添加：
-          # Release\x64\*.dll
+          Release\x64\*.exe
+          Release\x64\*.pdb
