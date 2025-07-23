@@ -19,7 +19,7 @@ jobs:
     - name: 🛠️ Setup MSVC environment
       uses: microsoft/setup-msbuild@v1
 
-    - name: 📥 Restore NuGet packages
+    - name: 📥 Restore NuGet packages 
       run: nuget restore JuicyPotato/JuicyPotato.sln 
 
     - name: 🔨 Build Visual Studio C++ Project
@@ -31,29 +31,18 @@ jobs:
           /p:WindowsTargetPlatformVersion=10.0.22621.0 `
           /p:PlatformToolset=v143 `
           /t:Build
-      working-directory: JuicyPotato # 确保此工作目录是 JuciyPotato.sln 所在的目录
+      working-directory: JuicyPotato 
 
-    - name: 🔍 List Build Output # **新增调试步骤：列出编译后的文件**
-      shell: powershell
-      run: |
-        Write-Host "Listing files under working directory: ${{ github.workspace }}\JuicyPotato"
-        # 使用 recursedir 命令列出当前工作目录（即JuicyPotato文件夹）下的所有文件和文件夹
-        # 这将帮助您找到 .exe 和 .dll 文件的实际位置
-        Get-ChildItem -Path "${{ github.workspace }}\JuicyPotato" -Recurse -Force | Select-Object FullName, Name, Attributes, Length | Format-Table -AutoSize
-        
-        # 也可以尝试直接在 PowerShell 中使用 dir 命令
-        # dir /s "${{ github.workspace }}\JuicyPotato"
-        
-        Write-Host "--- End of file listing ---"
+    # 移除调试步骤 `🔍 List Build Output`，因为它已经完成了它的使命
+    # 如果您需要它，可以保留，但通常在定位问题后会删除以减少日志噪音和运行时间
 
-    - name: ⬆️ Upload Build Artifacts # 步骤4: 可选：上传编译后的产物
+    - name: ⬆️ Upload Build Artifacts # 步骤4: 上传编译后的产物
       uses: actions/upload-artifact@v4
       with:
         name: Build-Output-Windows # 产物名称
-        # **重要：运行一次后，根据`List Build Output`的日志，修改这里的路径！**
-        # 假设调试后发现文件在 JuicyPotato\x64\Release\ 目录下，则保持不变
-        # 假设调试后发现文件在 JuicyPotato\JuicyPotato\x64\Release\ 目录下，则改为 path: JuicyPotato\x64\Release\
-        # 假设调试后发现文件在 JuicyPotato\Release\x64\ 目录下，则改为 path: Release\x64\
-        path: | 
-          JuicyPotato\x64\Release\*.exe  # 请根据实际输出路径调整此行
-          JuicyPotato\x64\Release\*.dll  # 请根据实际输出路径调整此行
+        path: |
+          # ***** 关键修复：路径现在是相对于 working-directory: JuicyPotato 的 *****
+          Release\x64\*.exe  # 实际的 .exe 文件路径
+          Release\x64\*.pdb  # 调试符号文件（通常也需要上传）
+          # 如果有 .dll 文件，也要添加：
+          # Release\x64\*.dll
