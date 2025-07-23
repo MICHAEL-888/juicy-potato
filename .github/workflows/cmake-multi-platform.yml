@@ -2,53 +2,40 @@ name: Visual Studio C++ Build
 
 on:
   push:
-    branches: [ master ] # 当代码推送到main分支时触发
+    branches: [ master ]
   pull_request:
-    branches: [ master ] # 当有针对main分支的拉取请求时触发
+    branches: [ master ]
 
 jobs:
   build_windows_cpp:
-    runs-on: windows-latest # 在最新的Windows环境中运行此作业，该环境预装Visual Studio和MSBuild
+    runs-on: windows-latest
 
     steps:
     - name: 📦 Checkout repository # 步骤1: 检出代码
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0 # 建议获取完整历史，以便某些工具（如GitVersion）正常工作
+        fetch-depth: 0
+
+    - name: 🛠️ Setup MSVC environment # **新添加的步骤：设置Visual C++构建环境**
+      uses: microsoft/setup-msbuild@v1 # 这个Action会确保msbuild在PATH中可用
+
+    - name: 📥 Restore NuGet packages # 步骤2: 可选：还原 NuGet 包
+      run: nuget restore JuicyPotato/JuicyPotato.sln 
+      # 确认JuicyPotato.sln的正确路径。如果直接在仓库根目录，则为 `nuget restore JuicyPotato.sln`
 
     - name: 🔨 Build Visual Studio C++ Project # 步骤3: 使用 MSBuild 编译项目
       run: |
-        # %VSAPPIDDIR% 是 Visual Studio 环境变量，通常指向 MSBuild
-        # MSBuild 命令：
-        # - `/p:Configuration=Release` 指定编译配置 (Release, Debug等)
-        # - `/p:Platform=x64` 指定目标平台 (x64, Win32等)
-        # - `/t:Build` 指定构建目标 (Build, Rebuild, Clean等)
-        # 替换 YourSolution.sln 为您的实际解决方案文件名及其相对路径
-        # 例如：YourSolution.sln
-        # 如果解决方案在子目录，如 'src/MyProject/MyProject.sln'
-        #"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe" YourSolution.sln /p:Configuration=Release /p:Platform=x64 /t:Build
-        
-        # 简化命令：MSBuild通常在Path环境变量中，无需指定完整路径
-        msbuild JuicyPotato.sln /p:Configuration=Release /p:Platform=x64 /p:ControlFlowGuard=false /t:Build
-      # 如果解决方案文件不在仓库根目录，请在这里调整路径，例如：
-      working-directory: JuicyPotato
+        msbuild JuicyPotato.sln `
+          /p:Configuration=Release `
+          /p:Platform=x64 `
+          /p:ControlFlowGuard=false `
+          /t:Build
+      working-directory: JuicyPotato # 确认JuicyPotato.sln所在文件夹，确保路径正确
 
     - name: ⬆️ Upload Build Artifacts # 步骤4: 可选：上传编译后的产物
       uses: actions/upload-artifact@v4
       with:
         name: Build-Output-Windows # 产物名称
         path: |
-          # 请根据您的项目输出路径进行调整
-          # 典型的Release x64输出路径可能在 Release_x64 或 x64/Release 目录下
-          # 假设您的解决方案名为 "YourSolution"，项目名为 "YourProject"
-          # 您可能需要找到 xxx.exe, xxx.dll, xxx.lib 等文件
-          # 例如：YourSolution/x64/Release/YourProject.exe
-          # 例如：YourSolution/Release/YourProject.exe
-          JuicyPotato\x64\Release\*.exe  # 示例：上传所有可执行文件
-          JuicyPotato\x64\Release\*.dll  # 示例：上传所有动态链接库
-          # YourSolution\x64\Release\*.pdb # 调试符号文件 (可选)
-          # YourSolution\x64\Release\*.lib # 静态库文件 (可选)
-          
-          # 如果您的项目输出在解决方案根目录下的公共文件夹（如 bin/Release）
-          # bin/Release/*.exe
-          # bin/Release/*.dll
+          JuicyPotato\x64\Release\*.exe  # 示例路径，请根据实际输出调整
+          JuicyPotato\x64\Release\*.dll  # 示例路径，请根据实际输出调整
