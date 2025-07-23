@@ -21,15 +21,16 @@ jobs:
 
     - name: 📥 Restore NuGet packages # 步骤2: 可选：还原 NuGet 包
       run: nuget restore JuicyPotato/JuicyPotato.sln 
-      # 请再次确认JuicyPotato.sln的正确路径。如果直接在仓库根目录，则为 `nuget restore JuicyPotato.sln`
+      # 确认JuicyPotato.sln的正确路径。如果直接在仓库根目录，则为 `nuget restore JuicyPotato.sln`
 
     - name: 🔨 Build Visual Studio C++ Project # 步骤3: 使用 MSBuild 编译项目
       run: |
         msbuild JuicyPotato.sln `
           /p:Configuration=Release `
           /p:Platform=x64 `
-          /p:ControlFlowGuard=false ` # 禁用控制流防护
-          /p:WindowsTargetPlatformVersion=10.0.22621.0 ` # <--- **关键更改：指定Windows SDK版本**
+          /p:ControlFlowGuard=false `
+          /p:WindowsTargetPlatformVersion=10.0.22621.0 ` # <--- 指定Windows SDK版本
+          /p:PlatformToolset=v143 ` # <--- **关键更改：强制使用VS2022工具集**
           /t:Build
       working-directory: JuicyPotato # 确认JuicyPotato.sln所在文件夹，确保路径正确
 
@@ -40,4 +41,3 @@ jobs:
         path: |
           JuicyPotato\x64\Release\*.exe  # 示例路径，请根据实际输出调整
           JuicyPotato\x64\Release\*.dll  # 示例路径，请根据实际输出调整
-          # YourSolution\x64\Release\*.pdb # 调试符号文件 (可选)
