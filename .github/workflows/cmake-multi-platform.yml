@@ -16,17 +16,14 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: 🛠️ Setup MSVC environment # 设置Visual C++构建环境，确保msbuild可用
+    - name: 🛠️ Setup MSVC environment
       uses: microsoft/setup-msbuild@v1
 
-    - name: 📥 Restore NuGet packages # 步骤2: 可选：还原 NuGet 包
+    - name: 📥 Restore NuGet packages
       run: nuget restore JuicyPotato/JuicyPotato.sln 
-      # 确认JuicyPotato.sln的正确路径。如果直接在仓库根目录，则为 `nuget restore JuicyPotato.sln`
 
-    - name: 🔨 Build Visual Studio C++ Project # 步骤3: 使用 MSBuild 编译项目
+    - name: 🔨 Build Visual Studio C++ Project
       run: |
-        # ***** 极其重要：请确保每个 ` 符号后面都没有空格或其他字符，紧接着就是换行符！*****
-        # 不要手动输入，直接复制粘贴此块以确保正确性。
         msbuild JuicyPotato.sln `
           /p:Configuration=Release `
           /p:Platform=x64 `
@@ -34,12 +31,29 @@ jobs:
           /p:WindowsTargetPlatformVersion=10.0.22621.0 `
           /p:PlatformToolset=v143 `
           /t:Build
-      working-directory: JuicyPotato # 确认JuicyPotato.sln所在文件夹，确保路径正确
+      working-directory: JuicyPotato # 确保此工作目录是 JuciyPotato.sln 所在的目录
+
+    - name: 🔍 List Build Output # **新增调试步骤：列出编译后的文件**
+      shell: powershell
+      run: |
+        Write-Host "Listing files under working directory: ${{ github.workspace }}\JuicyPotato"
+        # 使用 recursedir 命令列出当前工作目录（即JuicyPotato文件夹）下的所有文件和文件夹
+        # 这将帮助您找到 .exe 和 .dll 文件的实际位置
+        Get-ChildItem -Path "${{ github.workspace }}\JuicyPotato" -Recurse -Force | Select-Object FullName, Name, Attributes, Length | Format-Table -AutoSize
+        
+        # 也可以尝试直接在 PowerShell 中使用 dir 命令
+        # dir /s "${{ github.workspace }}\JuicyPotato"
+        
+        Write-Host "--- End of file listing ---"
 
     - name: ⬆️ Upload Build Artifacts # 步骤4: 可选：上传编译后的产物
       uses: actions/upload-artifact@v4
       with:
         name: Build-Output-Windows # 产物名称
-        path: |
-          JuicyPotato\x64\Release\*.exe  # 示例路径，请根据实际输出调整
-          JuicyPotato\x64\Release\*.dll  # 示例路径，请根据实际输出调整
+        # **重要：运行一次后，根据`List Build Output`的日志，修改这里的路径！**
+        # 假设调试后发现文件在 JuicyPotato\x64\Release\ 目录下，则保持不变
+        # 假设调试后发现文件在 JuicyPotato\JuicyPotato\x64\Release\ 目录下，则改为 path: JuicyPotato\x64\Release\
+        # 假设调试后发现文件在 JuicyPotato\Release\x64\ 目录下，则改为 path: Release\x64\
+        path: | 
+          JuicyPotato\x64\Release\*.exe  # 请根据实际输出路径调整此行
+          JuicyPotato\x64\Release\*.dll  # 请根据实际输出路径调整此行
